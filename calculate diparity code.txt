@@ -1,0 +1,33 @@
+import numpy as np
+import cv2
+
+if __name__ == '__main__':
+    print 'loading images...'
+    imgR = cv2.imread('opencv_frame1_L0.png')   # downscale images for faster processing
+    imgL = cv2.imread('opencv_frame2_R0.png')
+
+    # disparity range is tuned for 'aloe' image pair
+    window_size = 3
+    min_disp = 16
+    num_disp = 112-min_disp
+    stereo = cv2.StereoSGBM(minDisparity = min_disp,
+        numDisparities = num_disp,
+        SADWindowSize = window_size,
+        uniquenessRatio =10,
+        speckleWindowSize = 100,
+        speckleRange = 32,
+        disp12MaxDiff = 1,
+        P1 = 8*3*window_size**2,
+        P2 = 32*3*window_size**2,
+        fullDP = False
+    )
+
+    print 'computing disparity...'
+    disp = stereo.compute(imgL, imgR).astype(np.float32) / 16.0
+
+
+    cv2.imshow('left', imgL)
+    cv2.imshow('right', imgR)
+    cv2.imshow('disparity', (disp-min_disp)/num_disp)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
